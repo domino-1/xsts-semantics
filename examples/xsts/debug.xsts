@@ -1,0 +1,17 @@
+var n: integer
+
+var randdInt : integer
+var randBool : boolean
+
+trans {}
+
+init {
+    n := 11;
+    randBool := randdInt > 1;
+}
+
+env {}
+
+prop {
+    n != 100
+}

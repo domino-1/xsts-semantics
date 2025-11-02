@@ -1,0 +1,11 @@
+type Colour: {RED, GREEN, BLUE}
+
+var c: integer = 0
+
+trans {}
+
+init {}
+
+env {}
+
+prop { c != 0 }

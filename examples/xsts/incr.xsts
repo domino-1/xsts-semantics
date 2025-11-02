@@ -1,0 +1,13 @@
+var n : integer = 0
+
+trans {
+    n := n + 1;
+}
+
+init{}
+
+env{}
+
+prop {
+    n < 100
+}

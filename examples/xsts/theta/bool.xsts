@@ -1,0 +1,21 @@
+//https://github.com/ftsrg/theta/blob/master/subprojects/xsts/xsts-analysis/src/test/resources/model/bool.xsts
+//modification: `trans {...} or {...}` to `trans { choice {...} or {...} }`
+
+var a : boolean = false
+var b : boolean = true
+
+trans{
+    choice {
+        a := !a;
+        b := !b;
+    } or {
+        a := a;
+        b := b;
+    }
+}
+
+init{}
+
+env{}
+
+prop{a == b}

@@ -1,0 +1,22 @@
+//infinite
+
+var x : integer = 20
+var y : integer = 0
+
+trans {
+    choice {
+        assume x>0;
+        x := x - 1;
+        y := y + 1;
+    } or {
+
+    }
+}
+
+init {}
+
+env {}
+
+prop{
+    x!=y
+}

@@ -1,0 +1,145 @@
+UV     := uv
+UV_RUN := $(UV) run --
+
+
+default: check test-unit
+
+all: check cov
+
+.PHONY: clean
+clean:
+	rm -rf dist .coverage cov-* .mypy_cache .pytest_cache
+	find -type d -name __pycache__ -prune -exec rm -rf {} \;
+
+.PHONY: build
+build:
+	$(UV) build
+
+
+# Docker
+
+K_VERSION  ?= $(shell cat deps/k_release)
+UV_VERSION ?= $(shell cat deps/uv_release)
+
+.PHONY: docker
+docker: TAG=runtimeverificationinc/imp-semantics:$(K_VERSION)
+docker: package/Dockerfile
+	docker build . \
+		--build-arg K_VERSION=$(K_VERSION)   \
+		--build-arg UV_VERSION=$(UV_VERSION) \
+		--file $< \
+		--tag $(TAG)
+
+
+# Kompilation
+
+KOMPILE ?= $(shell which kompile)
+
+.PHONY: have-k
+have-k: FOUND_VERSION=$(shell $(KOMPILE) --version | sed -n -e 's/^K version: *v\?\(.*\)$$/\1/p')
+have-k:
+	@[ ! -z "$(KOMPILE)" ] || \
+		(echo "K compiler (kompile) not found (use variable KOMPILE to override)."; exit 1)
+	@[ ! -z "$(FOUND_VERSION)" ] || \
+		(echo "Unable to determine K compiler ($(KOMPILE)) version."; exit 1)
+	@[ "$(K_VERSION)" = "$(FOUND_VERSION)" ] || \
+		echo "Unexpected kompile version $(FOUND_VERSION) (expected $(K_VERSION)). Trying anyway..."
+
+kdist: kdist-build kompile-build
+
+KDIST_ARGS :=
+
+kdist-build: have-k
+	$(UV_RUN) kdist --verbose build -j1 $(KDIST_ARGS)
+
+kompile-build:
+	$(UV_RUN) kompile --output-definition ./kompiled --backend haskell ./src/kxsts/kdist/kxsts-semantics/xsts.k
+
+.PHONY: kdist-clean
+kdist-clean:
+	$(UV_RUN) kdist clean
+
+
+# Tests
+
+TEST_ARGS :=
+
+test: test-all
+
+.PHONY: test-all
+test-all:
+	$(UV_RUN) pytest src/tests --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
+
+.PHONY: test-unit
+test-unit:
+	$(UV_RUN) pytest src/tests/unit --maxfail=1 --verbose $(TEST_ARGS)
+
+.PHONY: test-integration
+test-integration:
+	$(UV_RUN) pytest src/tests/integration --maxfail=1 --verbose --durations=0 --numprocesses=4 --dist=worksteal $(TEST_ARGS)
+
+
+# Coverage
+
+COV_ARGS :=
+
+cov: cov-all
+
+cov-%: TEST_ARGS += --cov=kxsts --no-cov-on-fail --cov-branch --cov-report=term
+
+cov-all: TEST_ARGS += --cov-report=html:cov-all-html $(COV_ARGS)
+cov-all: test-all
+
+cov-unit: TEST_ARGS += --cov-report=html:cov-unit-html $(COV_ARGS)
+cov-unit: test-unit
+
+cov-integration: TEST_ARGS += --cov-report=html:cov-integration-html $(COV_ARGS)
+cov-integration: test-integration
+
+
+# Checks and formatting
+
+# "isort black" and "check-isort check-black" was between autoflake in both
+format: autoflake
+check: check-flake8 check-mypy check-autoflake
+
+.PHONY: check-flake8
+check-flake8:
+	$(UV_RUN) flake8 src
+
+.PHONY: check-mypy
+check-mypy:
+	$(UV_RUN) mypy src
+
+.PHONY: autoflake
+autoflake:
+	$(UV_RUN) autoflake --quiet --in-place src
+
+.PHONY: check-autoflake
+check-autoflake:
+	$(UV_RUN) autoflake --quiet --check src
+
+.PHONY: isort
+isort:
+	$(UV_RUN) isort src
+
+.PHONY: check-isort
+check-isort:
+	$(UV_RUN) isort --check src
+
+.PHONY: black
+black:
+	$(UV_RUN) black src
+
+.PHONY: check-black
+check-black:
+	$(UV_RUN) black --check src
+
+
+# Optional tools
+
+SRC_FILES := $(shell find src -type f -name '*.py')
+
+.PHONY: pyupgrade
+pyupgrade:
+	$(UV_RUN) pyupgrade --py310-plus $(SRC_FILES)

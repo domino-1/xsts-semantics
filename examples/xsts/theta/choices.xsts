@@ -1,0 +1,38 @@
+//https://github.com/ftsrg/theta/blob/master/subprojects/xsts/xsts-analysis/src/test/resources/model/choices.xsts
+//infinite -> depth 100
+
+var x : integer = 0
+
+trans {
+    choice {
+
+    } or {
+        choice {
+
+        } or {
+            choice {
+                x := 4;
+            }
+        }
+    }
+}
+
+init {
+    choice {
+        x := 2;
+    } or {
+        choice {
+            x := 2;
+        } or {
+            choice {
+                x := 2;
+            }
+        }
+    }
+}
+
+env {}
+
+prop {
+    !(x == 4)
+}

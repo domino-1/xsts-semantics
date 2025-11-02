@@ -1,0 +1,65 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "kxsts"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+requires-python = "~=3.10"
+dependencies = [
+    "kframework==7.1.280",
+]
+
+[[project.authors]]
+name = "demo"
+email = "demo@gmail.com"
+
+[project.scripts]
+kxsts = "kxsts.__main__:main"
+kxsts-kdist = "pyk.kdist.__main__:main"
+
+[project.entry-points.kdist]
+kxsts-semantics = "kxsts.kdist.plugin"
+
+[dependency-groups]
+dev = [
+    "autoflake",
+    "black",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-comprehensions",
+    "flake8-quotes",
+    "flake8-type-checking",
+    "isort",
+    "mypy",
+    "pep8-naming",
+    "pytest",
+    "pytest-cov",
+    "pytest-mock",
+    "pytest-xdist",
+    "pyupgrade",
+]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.isort]
+profile = "black"
+line_length = 120
+
+[tool.autoflake]
+recursive = true
+expand-star-imports = true
+remove-all-unused-imports = true
+ignore-init-module-imports = true
+remove-duplicate-keys = true
+remove-unused-variables = true
+
+[tool.black]
+line-length = 120
+skip-string-normalization = true
+
+[tool.mypy]
+disallow_untyped_defs = true

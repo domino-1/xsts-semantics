@@ -1,0 +1,23 @@
+type Colour: {RED, GREEN, BLUE}
+ 
+var x: integer = 0
+var col: Colour = Colour.RED
+var b: boolean
+ 
+trans {
+    havoc b;
+    choice {
+        assume x < 5;
+        col := Colour.GREEN;
+    } or {
+        x := x - 1;
+    }
+}
+
+init { }
+ 
+env {
+    x := x + 1;
+}
+
+prop { col != Colour.GREEN }

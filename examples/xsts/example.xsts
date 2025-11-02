@@ -1,0 +1,68 @@
+type Color : {
+    RED, GREEN
+}
+type Car : {
+    HONDA, TOYOTA, MASERATI
+}
+
+var n: integer
+var isnt: boolean = false
+var color: Color = Color.RED
+var is: boolean = isnt
+var randdInt : integer
+var randBool : boolean
+var randCar : Car
+var name: integer = 0 + 1
+
+trans {
+    choice {
+        n := 10;
+    } or {
+        assume 10 > 5;
+        name := 10;
+    } or {
+        is := RED == RED;
+    } or {
+    }
+
+    n := 20;
+}
+
+init {
+    n := 10 + 1; //+ 3 / 2 + 4
+    assume n > 5;
+    name := n;
+    is := Color.RED == Color.RED;
+    isnt := true;
+    color := Color.GREEN; //Color.BLUE
+    havoc color;
+    //a := 1;
+
+    //assume true;
+
+    choice {
+        assume true;
+        name := 20;
+        choice {
+            n := 50;
+        }
+        or {
+            n := 100;
+        }
+    } or {
+        assume true;
+        name := 10;
+    } or {
+    }
+
+    randBool := randdInt > 1;
+}
+
+env {
+    n := 30;
+}
+
+prop {
+    //true
+    n != 100
+}
